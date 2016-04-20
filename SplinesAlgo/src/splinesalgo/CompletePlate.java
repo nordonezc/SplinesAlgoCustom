@@ -7,6 +7,7 @@ package splinesalgo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Random;
  */
 public class CompletePlate {
     int space, surplus;
-    int plate[][] = new int[20][20];
+    int plate[][] = new int[20][100];
     private int lastFilled[][];
     private boolean isEmpty = false;
     FormPlate chromosome[] = new FormPlate[10];
@@ -48,11 +49,11 @@ public class CompletePlate {
     }
     
     public CompletePlate(FormPlate[] candidate, int knows) {
+        Date date = new Date();
         this.lastFilled = new int[][]{{0,0}, {0,0}};
         isEmpty = true;
         space = 0;
         surplus = 0;
-        initPlate();
         
         for(int i=0; i<candidate.length; i++){
             chromosome[i] = candidate[i];
@@ -67,7 +68,16 @@ public class CompletePlate {
         initSpace();
     }
 
+    private void showPosition(){
+        System.out.println("ultima posicion llenada: "+
+                " |x1 "+lastFilled[0][0]+
+                " |y1 "+lastFilled[0][1]+
+                " |x2 "+lastFilled[1][0]+
+                " |y2 "+lastFilled[1][1]);
+    }
+    
     private void fillPlate(int alto, int ancho){
+        showPosition();
         if(isEmpty == true){
             isEmpty = false;
             lastFilled[0][0]=0;
@@ -82,7 +92,7 @@ public class CompletePlate {
             lastFilled[0][1]=lastFilled[0][1];
             lastFilled[1][0]=+alto;
             if(new_ancho > lastFilled[1][1])
-                lastFilled[1][1]=lastFilled[0][1]+ancho;
+                lastFilled[1][1]=new_ancho;
         }
         
         else{
@@ -92,15 +102,17 @@ public class CompletePlate {
             lastFilled[1][1]=+ancho;
         }
         
-        for(int i=lastFilled[1][0]; i<lastFilled[1][0]+alto; i++){
+        for(int i=lastFilled[0][0]; i<lastFilled[1][0]; i++){
             for(int j=lastFilled[0][1]; i<lastFilled[0][1]+ancho; j++)
                 plate[i][j] += 1;
         }
+        
+        showPosition();
     }
     
     private void initPlate(){
         for (int[] plate1 : plate) 
-            for (int j = 0; j < plate1.length; j++) plate1[j] += 0;
+            for (int j = 0; j < plate1.length; j++) plate1[j] = 0;
     }
     
     private void initSpace(){

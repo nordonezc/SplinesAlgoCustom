@@ -22,6 +22,7 @@ public class Evaluator implements FitnessEvaluator<FormPlate[]>
      * Assigns one "fitness point" for every character in the
      * candidate String that matches the corresponding position in
      * the target string.
+     * @param chromosome
      * @param candidate
      * @param population
      * @return matches

@@ -43,6 +43,7 @@ import org.uncommons.watchmaker.framework.termination.TargetFitness;
 import org.uncommons.maths.random.*;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
 import org.uncommons.watchmaker.framework.PopulationData;
+import org.uncommons.watchmaker.framework.termination.Stagnation;
 import splinesalgo.Evaluator;
 
 
@@ -73,12 +74,20 @@ public class PointsEx extends JFrame{
         calc.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //calcFloor();
+            }
+        });
+        JButton floorPlanning =  new JButton("Calcular Placa");
+        floorPlanning.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 calcFloor();
             }
         });
         buttons = new JPanel();
         
         buttons.add(calc);
+        buttons.add(floorPlanning);
         buttons.setBorder(BorderFactory.createLineBorder(Color.BLUE));
         buttons.setSize(new Dimension(100,50));
         holder.add(buttons);
@@ -189,7 +198,7 @@ public class PointsEx extends JFrame{
         operators = new LinkedList< >();
         
         operators.add(new ObjectArrayCrossover<FormPlate>());
-        operators.add(new Replacement<>(factory, Probability.EVENS));
+        operators.add(new Replacement<>(factory, new Probability(0.2)));
         
         EvolutionPipeline<FormPlate[]> pipeline = new EvolutionPipeline<>(operators);
 
@@ -202,11 +211,11 @@ public class PointsEx extends JFrame{
         engine.addEvolutionObserver(new EvolutionObserver<FormPlate[]>(){
             @Override
             public void populationUpdate(PopulationData<? extends FormPlate[]> data){
-                System.out.println("Gen " + data.getGenerationNumber() + ": " + data.getBestCandidate() + ",MF:"+ data.getBestCandidateFitness());
+                System.out.println("Gen " + data.getGenerationNumber() + ": " + Arrays.toString(data.getBestCandidate()) + ",MF:"+ data.getBestCandidateFitness());
             }
         });
         
-        FormPlate[] result = engine.evolve(5, 0, new GenerationCount(1));
+        FormPlate[] result = engine.evolve(2, 0, new Stagnation(2, false));
         CompletePlate finalResult = new CompletePlate(result, 1);
         System.out.println("Resultado -->"+finalResult.candidateToString() + " matriz " + finalResult.toString());
         
