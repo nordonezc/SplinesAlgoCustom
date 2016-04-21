@@ -6,22 +6,157 @@
 package splinesalgo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Random;
+import java.util.List;
 
 /**
  *
  * @author nikic
  */
 public class CompletePlate {
-    int space, surplus;
+    
+    public class Plate{
+        int alto;
+        int ancho;
+
+        public Plate(int alto, int ancho) {
+            this.alto = alto;
+            this.ancho = ancho;
+        }
+
+        public int getAlto() {
+            return alto;
+        }
+
+        public int getAncho() {
+            return ancho;
+        }
+    }
+
+    int area_available=100;
+    public static int plate[][];
+    private final List<Plate> POSIBILITIES;
+    
+    public CompletePlate(List<FormPlate> chromosome)
+    {
+        POSIBILITIES = new ArrayList<>();
+        POSIBILITIES.add(new Plate(8,3));
+        POSIBILITIES.add(new Plate(5,1));
+        POSIBILITIES.add(new Plate(2,2));
+        POSIBILITIES.add(new Plate(1,1));
+        POSIBILITIES.add(new Plate(9,4));
+        POSIBILITIES.add(new Plate(6,2));
+        POSIBILITIES.add(new Plate(4,3));
+        POSIBILITIES.add(new Plate(5,7));
+        POSIBILITIES.add(new Plate(3,2));
+        POSIBILITIES.add(new Plate(4,2));
+        
+        plate = new int[10][10];
+        initPlate();
+        for(FormPlate plateI: chromosome){
+            int alto = POSIBILITIES.get(plateI.identifier).getAlto();
+            int ancho = POSIBILITIES.get(plateI.identifier).getAncho();
+            int areaToFill = alto*ancho;
+            if(areaToFill<=area_available){
+                boolean isReady = false;
+                for(int i=0; i<10 && !isReady;i++){
+                    for(int j=0; j<10 && !isReady;j++){
+                        if(plateI.isOrientacion()){
+                            if(spaceAvailable(i, j, alto, ancho)){
+                                fillPlate(i, j, alto, ancho);
+                                area_available-=areaToFill;
+                                isReady = true;
+                            }
+                        }
+                        
+                        else{
+                            if(spaceAvailable(i, j, ancho, alto)){
+                                fillPlate(i, j, ancho, alto);
+                                area_available-=areaToFill;
+                                isReady = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void initPlate(){
+        for (int[] plate1 : plate) 
+            for (int j = 0; j < plate1.length; j++) plate1[j] = 0;
+    }
+    
+    public static boolean spaceAvailable(int fila,int columna,int alto,int ancho){ 
+        if(fila+alto>=10 || columna+ancho >= 10) return false;
+        
+        else{
+            for(int i = fila;i<fila+alto;i++){
+                for(int j = columna;j<columna+ancho;j++){
+                    if(plate[i][j]>0) return false;     
+                }
+            }
+            return true;
+        }
+    }
+    
+    public static void fillPlate(int fila, int columna, int alto, int ancho){
+        for(int i = fila;i<fila+alto;i++){
+            for(int j = columna;j< columna-ancho;j++) plate[i][j] +=1;
+        }
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public int fitness(){
+        return area_available;
+    }
+    
+    public void out(){
+        System.out.println(this.toString());;
+    }
+    
+    @Override
+    public String toString(){
+        String answer = "";
+        for(int i = 0;i>=10;i++){
+            for(int j = 0;j>= 10;j++) answer += " | " + plate[i][j];
+            answer += "\n";
+        }
+        return answer;
+    }
+    }
+    
+/*
+    int plate[][] = new int[10][10];
+    static List<FormPlate> posibilities = new ArrayList<>();
+    static{
+        posibilities.add(new FormPlate(0,8,3,true));
+        posibilities.add(new FormPlate(1,5,1,true));
+        posibilities.add(new FormPlate(2,2,2,true));
+        posibilities.add(new FormPlate(3,1,1,true));
+        posibilities.add(new FormPlate(4,9,4,true));
+        posibilities.add(new FormPlate(5,6,2,true));
+        posibilities.add(new FormPlate(6,4,3,true));
+        posibilities.add(new FormPlate(7,5,7,true));
+        posibilities.add(new FormPlate(8,3,2,true));
+        posibilities.add(new FormPlate(9,4,2,true));
+    }
+    
+    
+    
+    
+   int space, surplus;
     int plate[][] = new int[20][100];
     private int lastFilled[][];
     private boolean isEmpty = false;
     FormPlate chromosome[] = new FormPlate[10];
+    
+    
 
-    public CompletePlate(FormPlate[] posibilidades) {
+
+    public CompletePlate(List<FormPlate> posibilidades) {
         this.lastFilled = new int[][]{{0,0}, {0,0}};
         isEmpty = true;
         space = 0;
@@ -29,8 +164,7 @@ public class CompletePlate {
         initPlate();
         
         Random m = new Random();
-        ArrayList<FormPlate> chooser = new ArrayList<>();
-        chooser.addAll(Arrays.asList(posibilidades));
+        List<FormPlate> chooser = posibilidades;
         
         for(int i=0; chooser.size()>0; i++){
             int seleccion = m.nextInt(chooser.size());
@@ -151,5 +285,6 @@ public class CompletePlate {
     public String candidateToString(){
         return surplus + " " + space;
     }
-   
 }
+   */
+

@@ -11,8 +11,6 @@ package splinesalgo;
  */
 public class FormPlate {
     int identifier;
-    int ancho;
-    int alto;
     boolean orientacion;
     
     /**
@@ -22,10 +20,8 @@ public class FormPlate {
      * @param l tamaño del largo
      * @param t orientacion 1 = horizontal, 0 = vertical
      */
-    public FormPlate(int numberOfPiece, int w, int l, boolean t){
+    public FormPlate(int numberOfPiece, boolean t){
         identifier = numberOfPiece;
-        ancho = w;
-        alto = l;
         orientacion = t;
     }
 
@@ -36,33 +32,17 @@ public class FormPlate {
     public void setIdentifier(int identifier) {
         this.identifier = identifier;
     }
-    
-    public int getAncho() {
-        return ancho;
-    }
-
-    public void setAncho(int ancho) {
-        this.ancho = ancho;
-    }
-
-    public int getAlto() {
-        return alto;
-    }
-
-    public void setAlto(int alto) {
-        this.alto = alto;
-    }
 
     public boolean isOrientacion() {
         return orientacion;
     }
 
-    public void setOrientacion(boolean orientacion) {
-        this.orientacion = orientacion;
+    public void invOrientacion() {
+        this.orientacion = !orientacion;
     }
 
     @Override
     public String toString() {
-        return "FormPlate{" + "identifier=" + identifier + ", ancho=" + ancho + ", largo=" + alto + ", orientacion=" + orientacion + '}';
+        return "FormPlate{" + "identifier=" + identifier + " orientacion=" + orientacion + '}';
     }
 }

@@ -5,8 +5,7 @@
  */
 package splinesalgo;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
+import java.util.ArrayList;
 import java.util.List;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -14,34 +13,25 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  *
  * @author Alfr3
  */
-public class Evaluator implements FitnessEvaluator<FormPlate[]>
+public class Evaluator implements FitnessEvaluator<List<FormPlate>>
 {
-    private final int target = 0;
-
     /**
      * Assigns one "fitness point" for every character in the
      * candidate String that matches the corresponding position in
      * the target string.
      * @param chromosome
-     * @param candidate
      * @param population
      * @return matches
      */
     @Override
-    public double getFitness(FormPlate[] chromosome, List<? extends FormPlate[]> population)
+    public double getFitness(List<FormPlate> chromosome, List<? extends List<FormPlate>> population)
     {
-        CompletePlate candidate = new CompletePlate(chromosome, 0);
-        double matches = (int) (pow((candidate.surplus-target),2) + candidate.getSpace());
-        return matches;
+        CompletePlate cp = new CompletePlate(chromosome);
+        return cp.fitness();
     }
 
     @Override
-    public boolean isNatural()
-    {
-        //true -> maximizacion
-        //false -> minimizacion
-        return true;
+    public boolean isNatural(){
+        return false;
     }
-
-    
 }

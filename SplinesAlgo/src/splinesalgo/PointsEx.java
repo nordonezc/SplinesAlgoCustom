@@ -17,35 +17,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.Probability;
+import org.uncommons.maths.random.XORShiftRNG;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 import org.uncommons.watchmaker.framework.GenerationalEvolutionEngine;
-import org.uncommons.watchmaker.framework.factories.ListPermutationFactory;
 import org.uncommons.watchmaker.framework.factories.ObjectArrayPermutationFactory;
-import org.uncommons.watchmaker.framework.factories.StringFactory;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
-import org.uncommons.watchmaker.framework.operators.ListCrossover;
-import org.uncommons.watchmaker.framework.operators.ListOrderMutation;
 import org.uncommons.watchmaker.framework.operators.ObjectArrayCrossover;
 import org.uncommons.watchmaker.framework.operators.Replacement;
-import org.uncommons.watchmaker.framework.operators.StringCrossover;
-import org.uncommons.watchmaker.framework.operators.StringMutation;
 import org.uncommons.watchmaker.framework.selection.RouletteWheelSelection;
-import org.uncommons.watchmaker.framework.termination.GenerationCount;
-import org.uncommons.watchmaker.framework.termination.TargetFitness;
-import org.uncommons.maths.random.*;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
 import org.uncommons.watchmaker.framework.PopulationData;
+import org.uncommons.watchmaker.framework.factories.ListPermutationFactory;
+import org.uncommons.watchmaker.framework.operators.ListOrderCrossover;
+import org.uncommons.watchmaker.framework.termination.GenerationCount;
 import org.uncommons.watchmaker.framework.termination.Stagnation;
-import splinesalgo.Evaluator;
-
 
 /**
  *
@@ -60,16 +54,10 @@ public class PointsEx extends JFrame{
     }
 
     private void initUI() {
-        /*final JFrame frame = new JFrame(PointsEx.class.getSimpleName());*/
-        //frame.
-          
-        //frame.
-              
         holder = new JPanel();
         //holder.setLayout(new BoxLayout(holder, BoxLayout.PAGE_AXIS));
         holder.setLayout(new BorderLayout(50,50));
-        
-        
+     
         JButton calc =  new JButton("Calcular");
         calc.addActionListener(new ActionListener() {
             @Override
@@ -77,6 +65,7 @@ public class PointsEx extends JFrame{
                 //calcFloor();
             }
         });
+        
         JButton floorPlanning =  new JButton("Calcular Placa");
         floorPlanning.addActionListener(new ActionListener() {
             @Override
@@ -84,26 +73,21 @@ public class PointsEx extends JFrame{
                 calcFloor();
             }
         });
-        buttons = new JPanel();
         
-        buttons.add(calc);
+        buttons = new JPanel();
         buttons.add(floorPlanning);
         buttons.setBorder(BorderFactory.createLineBorder(Color.BLUE));
         buttons.setSize(new Dimension(100,50));
         holder.add(buttons);
         
-        
         surface = new Surface();
-        //surface.setPreferredSize(new Dimension(100, 100));
-        //add(surface);
         holder.add(surface);
         add(holder);
         setTitle("Points");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 setLocationRelativeTo(null);
-        
-        
+
         surface.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(MouseEvent evt) {
                     
@@ -165,59 +149,76 @@ public class PointsEx extends JFrame{
         holder.repaint();
     }*/
     
+    static List<FormPlate> plate;
+    List<FormPlate> plateSort;
 
+    public List<FormPlate> getPlate() {
+        return plate;
+    }
+
+    public void setPlate(ArrayList<FormPlate> plate) {
+        this.plate = plate;
+    }
+    
+    public void fillPlate(Random rnd){
+        List<FormPlate> plates = new LinkedList<>();
+        for(int i = 0; i<10; i++)
+            plates.add(new FormPlate(i,rnd.nextBoolean()));
+        this.plateSort = plates;
+    }
+    
     public void calcFloor(){
-        FormPlate posibilities[] = new FormPlate[10];
-        FormPlate p0 = new FormPlate(0,8,3,true);
-        FormPlate p1 = new FormPlate(1,5,1,true);
-        FormPlate p2 = new FormPlate(2,2,2,true);
-        FormPlate p3 = new FormPlate(3,1,1,true);
-        FormPlate p4 = new FormPlate(4,9,4,true);
-        FormPlate p5 = new FormPlate(5,6,2,true);
-        FormPlate p6 = new FormPlate(6,4,3,true);
-        FormPlate p7 = new FormPlate(7,5,7,true);
-        FormPlate p8 = new FormPlate(8,3,2,true);
-        FormPlate p9 = new FormPlate(9,4,2,true);
+        Random rnd = new Random();
+        this.fillPlate(rnd);
         
-        posibilities[0] = p0;
-        posibilities[1] = p1;
-        posibilities[2] = p2;
-        posibilities[3] = p3;
-        posibilities[4] = p4;
-        posibilities[5] = p5;
-        posibilities[6] = p6;
-        posibilities[7] = p7;
-        posibilities[8] = p8;
-        posibilities[9] = p9;
+        ListPermutationFactory<FormPlate> factory;
+        factory = new ListPermutationFactory<>(plateSort);
         
-        CandidateFactory<FormPlate[]> factory;
-        //extend AbstractCandidateFactory 
-        factory = new ObjectArrayPermutationFactory<>(posibilities);
+        List<EvolutionaryOperator<List<FormPlate>>> operators; 
+        operators = new LinkedList<EvolutionaryOperator<List<FormPlate>>>();
         
-        List<EvolutionaryOperator<FormPlate[]>> operators;
-        operators = new LinkedList< >();
+        EvolutionaryOperator<List<FormPlate>> changeOrientation;
+        changeOrientation = new EvolutionaryOperator<List<FormPlate>>() {
+            @Override
+            public List<List<FormPlate>> apply(List<List<FormPlate>> plate, Random random) {
+                Probability n = new Probability(0.3);
+                if(n.nextEvent(random)){
+                    LinkedList<List<FormPlate>> plateTMP = new LinkedList(plate);
+                    int candidate = random.nextInt(9);
+                    int candidateList = random.nextInt(plateTMP.size()-1);
+                    List<FormPlate> tempP = plateTMP.remove(candidateList);
+                    List<FormPlate> mutationP = mutation(tempP, candidate);
+                    plateTMP.add(mutationP);
+                    return plateTMP;
+                }
+                return plate;
+            }
+            public List<FormPlate> mutation(List<FormPlate> permutation,int candidate){ 
+                FormPlate temp = permutation.get(candidate);
+                //System.out.println("Lamina Original"+temp);
+                temp.invOrientacion();
+                permutation.set(candidate, temp);
+                //System.out.println("Lamina modificada"+temp);
+                return permutation;
+            }
+        };
         
-        operators.add(new ObjectArrayCrossover<FormPlate>());
-        operators.add(new Replacement<>(factory, new Probability(0.2)));
+        operators.add(new ListOrderCrossover());
+        operators.add(changeOrientation);
         
-        EvolutionPipeline<FormPlate[]> pipeline = new EvolutionPipeline<>(operators);
+        EvolutionaryOperator<List<FormPlate>> pipeline = new EvolutionPipeline<>(operators);
 
-        EvolutionEngine<FormPlate[]> engine;
+        EvolutionEngine<List<FormPlate>> engine;
         engine = new GenerationalEvolutionEngine<>(
                 factory, pipeline, new Evaluator(), 
                 new RouletteWheelSelection(),
-                new MersenneTwisterRNG() );
-        
-        engine.addEvolutionObserver(new EvolutionObserver<FormPlate[]>(){
-            @Override
-            public void populationUpdate(PopulationData<? extends FormPlate[]> data){
-                System.out.println("Gen " + data.getGenerationNumber() + ": " + Arrays.toString(data.getBestCandidate()) + ",MF:"+ data.getBestCandidateFitness());
-            }
-        });
-        
-        FormPlate[] result = engine.evolve(2, 0, new Stagnation(2, false));
-        CompletePlate finalResult = new CompletePlate(result, 1);
-        System.out.println("Resultado -->"+finalResult.candidateToString() + " matriz " + finalResult.toString());
+                new XORShiftRNG() );
+
+        List<FormPlate> result = engine.evolve(5, 2, new GenerationCount(2));
+        CompletePlate finalResult = new CompletePlate(result);
+        System.out.println("Resultado:");
+        System.out.println(result);
+        finalResult.out();
         
     }
     
