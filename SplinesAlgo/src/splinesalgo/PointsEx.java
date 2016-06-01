@@ -26,6 +26,7 @@ import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.Probability;
 import org.uncommons.maths.random.XORShiftRNG;
 import org.uncommons.watchmaker.framework.CandidateFactory;
+import org.uncommons.watchmaker.framework.EvaluatedCandidate;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 import org.uncommons.watchmaker.framework.GenerationalEvolutionEngine;
@@ -214,7 +215,14 @@ public class PointsEx extends JFrame{
                 new RouletteWheelSelection(),
                 new XORShiftRNG() );
 
-        List<FormPlate> result = engine.evolve(5, 2, new GenerationCount(2));
+        List<FormPlate> result = engine.evolve(20, 5, new GenerationCount(300));
+
+        List<EvaluatedCandidate<List<FormPlate>>> lastGen;
+        lastGen = engine.evolvePopulation(20, 5, new GenerationCount(300));
+        for(int i=0; i<lastGen.size(); i++){
+            System.out.println(lastGen.get(i).getFitness());
+            System.out.println(lastGen.get(i).getCandidate());
+        }
         CompletePlate finalResult = new CompletePlate(result);
         System.out.println("Resultado:");
         System.out.println(result);
